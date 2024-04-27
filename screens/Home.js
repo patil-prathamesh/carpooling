@@ -44,7 +44,6 @@ export default function App() {
             latitude: 19.016905216928386,
             longitude: 72.85891759428597
           }}
-          apikey='AIzaSyApdd4NYzFfpsUteHSNSSAthz0jbFQ548M'
 
         /> */}
         {/* 
