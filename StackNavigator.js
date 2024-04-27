@@ -21,7 +21,7 @@ import UserSignup from './screens/UserSignup.js';
 const Stack = createNativeStackNavigator();
 
 const StackNavigator = () => {
-    const [DRIVER, SETDRIVER] = useState(true)
+    const [DRIVER, SETDRIVER] = useState(false)
     const [USER, SETUSER] = useState(false)
     const [DESTINATION, SETDESTINATION] = useState()
     const [VIEWDRIVERDETAILS, SETVIEWDRIVERDETAILS] = useState()

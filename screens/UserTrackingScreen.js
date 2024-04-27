@@ -127,7 +127,9 @@ const UserTrackingScreen = () => {
 
     const [latitude, setLatitude] = useState(0)
     const [longitude, setLongitude] = useState(0)
-    const unsub = onSnapshot(doc(db, "drivers", "UbrDyXmxqiJOvwF5KTm9"), (doc) => {
+    const { VIEWDRIVERDETAILS, SETVIEWDRIVERDETAILS, USER } = useContext(UserContext);
+
+    const unsub = onSnapshot(doc(db, "drivers", VIEWDRIVERDETAILS.id), (doc) => {
         setLatitude(doc.data().latitude)
         setLongitude(doc.data().longitude)
     });

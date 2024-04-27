@@ -24,7 +24,7 @@ function DriverTrackingScreen() {
         let location = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Highest, maximumAge: 10000 });
         setLocation(location);
 
-        const driverRef = doc(db, "drivers", "wbIzM3p23uXJg6kJAT7Y");
+        const driverRef = doc(db, "drivers", DRIVER.id);
 
         await updateDoc(driverRef, {
             latitude: location?.coords?.latitude,

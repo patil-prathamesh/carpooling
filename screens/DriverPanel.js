@@ -1,9 +1,9 @@
 import { useNavigation } from '@react-navigation/native';
 import React, { useContext, useEffect, useState } from 'react';
 import { Button, Text, TextInput, TouchableOpacity, View, Image } from 'react-native';
-import { UserContext } from '../Contexts/UserContext';
 import { collection, doc, getDoc, getDocs, onSnapshot, updateDoc } from 'firebase/firestore';
 import { db } from '../firebase';
+import { UserContext } from '../Contexts/UserContext';
 
 
 const DriverPanel = () => {
@@ -19,10 +19,37 @@ const DriverPanel = () => {
     const [driverDetails, setDriverDetails] = useState([])
     const [passengersObj, setPassengersObj] = useState([])
 
-    const { DRIVER } = useContext(UserContext);
+    const { DRIVER, SETDRIVER, USER, SETUSER } = useContext(UserContext);
 
 
     const navigation = useNavigation();
+
+    const [location, setLocation] = useState(null);
+    const [errorMsg, setErrorMsg] = useState(null);
+
+    async function getLocation() {
+        let { status } = await Location.requestForegroundPermissionsAsync();
+        if (status !== 'granted') {
+            setErrorMsg('Permission to access location was denied');
+            return;
+        }
+
+        let location = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Highest, maximumAge: 10000 });
+        setLocation(location);
+
+        const driverRef = doc(db, "drivers", DRIVER.id);
+
+        await updateDoc(driverRef, {
+            latitude: location?.coords?.latitude,
+            longitude: location?.coords?.longitude
+        });
+
+    }
+
+    setTimeout(() => {
+        getLocation();
+    }, 4);
+
 
     const handleSubmit = async () => {
 
@@ -46,8 +73,8 @@ const DriverPanel = () => {
     };
 
 
-    async function confirmPassenger() {
-        const docRef = doc(db, "drivers", DRIVER.id);
+    async function confirmPassenger(passenger) {
+        const docRef = doc(db, "drivers", DRIVER.id, "passengers", passenger.id);
 
         try {
             await updateDoc(docRef, {
@@ -204,7 +231,7 @@ const DriverPanel = () => {
 
                             <View style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
                                 {passengersObj.map((passenger) => (
-                                    <TouchableOpacity key={passenger.id} style={{ marginTop: 20 }} >
+                                    <TouchableOpacity key={passenger.id} style={{ marginTop: 20 }} onPress={() => confirmPassenger(passenger)}>
 
                                         <View style={{ display: 'flex', flexDirection: 'row', justifyContent: 'start', alignItems: 'center', backgroundColor: 'white', borderRadius: 20, width: 340, height: 90, paddingLeft: 20 }}>
                                             {passenger.profileUrl ? (
@@ -221,8 +248,11 @@ const DriverPanel = () => {
                                                     style={{ width: 60, height: 60, borderRadius: 40 }}
                                                 />)
                                             }
+                                            <View style={{}}>
+                                                <Text style={{ color: 'white', fontSize: 20, marginLeft: 10, marginRight: 10, color: 'black' }}>{passenger.name}</Text>
+                                                <Text>Tap to Confirm</Text>
+                                            </View>
 
-                                            <Text style={{ color: 'white', fontSize: 20, marginLeft: 10, marginRight: 10, color: 'black' }}>{passenger.name}</Text>
                                             <View style={{ display: 'flex', flexDirection: 'row', justifyContent: 'center', alignItems: 'center', marginLeft: 20 }}>
                                                 <Image
                                                     source={require('../assets/phone.png')}
@@ -232,17 +262,27 @@ const DriverPanel = () => {
 
                                                 <Text style={{ color: 'white', fontSize: 14, fontWeight: 'bold', marginRight: 10, color: 'black', backgroundColor: 'white', padding: 10 }}>{passenger.phone}</Text>
                                             </View>
+
+
                                         </View>
+
 
                                     </TouchableOpacity>
 
                                 ))}
 
-
-
-
-
                             </View>
+
+                            <TouchableOpacity onPress={()=> navigation.navigate('DriverTrackingScreen')} style={{ marginTop: 20 }}>
+                                <View style={{
+                                    backgroundColor: 'black',
+                                    paddingHorizontal: 20,
+                                    paddingVertical: 10,
+                                    borderRadius: 5,
+                                }}>
+                                    <Text style={{ color: 'white', fontSize: 16 }}>Stop Waiting for others. Proceed to MapScreen</Text>
+                                </View>
+                            </TouchableOpacity>
                         </View>
 
 
