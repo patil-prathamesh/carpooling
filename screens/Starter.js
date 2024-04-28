@@ -9,12 +9,12 @@ const Starter = () => {
     return (
         <View style={styles.view}>
             <Image
-                source={require('../assets/school-bus.png')}
+                source={require('../assets/carpooling.gif')}
                 resizeMode="contain"
                 style={{ width: 280, height: 350 }}
             />
-            <Text style={{ fontSize: 20 }}>Bus Tracking App</Text>
-            <Text style={{ fontSize: 17, marginTop: 10}}>Track your bus from anywhere</Text>
+            <Text style={{ fontSize: 20, fontWeight: 'bold' }}>Carpooling App</Text>
+            <Text style={{ fontSize: 17, marginTop: 10}}>Sharing Rides, Sharing Smiles</Text>
             <View style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 40 }}>
                 <TouchableOpacity onPress={() => navigation.push('Role')}>
                     <View style={styles.view3}>

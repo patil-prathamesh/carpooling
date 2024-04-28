@@ -1,10 +1,11 @@
 import { View, Text, TextInput, Image, Pressable, ScrollView, TouchableOpacity } from 'react-native'
-import React, { useContext, useState } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { useNavigation } from '@react-navigation/native';
 import { UserContext } from '../Contexts/UserContext';
 import { addDoc, collection, doc, onSnapshot, updateDoc } from 'firebase/firestore';
 import { db } from '../firebase';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const DriverDetailsScreen = () => {
 
@@ -29,7 +30,9 @@ const DriverDetailsScreen = () => {
 
             alert('Requested Driver Successfully');
             setRequested(true)
-            setPassengerID(doc.id)
+            // await AsyncStorage.setItem("PassengerID", doc.id);
+
+            // setPassengerID(doc.id)
 
         } catch (error) {
             console.log(error)
@@ -37,14 +40,33 @@ const DriverDetailsScreen = () => {
         }
 
     };
-    if (passengerID) {
-        const unsub = onSnapshot(doc(db, "drivers", VIEWDRIVERDETAILS.id, "passengers", passengerID), (doc) => {
-            setAccepted(doc.data().requestStatus)
-            if (doc.data().requestStatus) {
-                navigation.navigate('UserTrackingScreen')
-            }
-        });
-    }
+    // useEffect(() => {
+    //     const getData = async () => {
+    //         try {
+    //             const value = await AsyncStorage.getItem("PassengerID");
+    //             if (value !== null) {
+    //                 setPassengerID(value)
+    //             } else {
+    //                 console.log('No data found for the given key:', key);
+    //             }
+    //         } catch (error) {
+    //             console.log('Error retrieving data:', error);
+    //         }
+    //     };
+    //     getData();
+
+    // }, [])
+
+    // if (passengerID) {
+    //     const unsub = onSnapshot(doc(db, "drivers", VIEWDRIVERDETAILS.id, "passengers", passengerID), (doc) => {
+    //         setAccepted(doc.data().requestStatus)
+    //         if (doc.data().requestStatus) {
+    //             navigation.navigate('UserTrackingScreen')
+    //         }
+    //     });
+    // }
+
+
 
 
 
