@@ -2,7 +2,7 @@ import React, { useContext, useState } from 'react';
 import { Button, Image, ScrollView, Text, TextInput, View, TouchableOpacity, Pressable } from 'react-native';
 import hide from "../assets/hide.png"
 import viewButton from "../assets/view.png"
-import { addDoc, collection } from 'firebase/firestore';
+import { addDoc, collection, getDocs, query, where } from 'firebase/firestore';
 import { db } from "../firebase"
 import { useNavigation } from '@react-navigation/native';
 import { UserContext } from '../Contexts/UserContext';
@@ -11,37 +11,50 @@ const DriverSignup = () => {
 
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const [phone, setPhone] = useState('');
+  const [phone, setPhone] = useState(0);
   const [name, setName] = useState('');
   const [view, setView] = useState(false);
   const navigation = useNavigation();
   const { DRIVER, SETDRIVER } = useContext(UserContext);
 
   const signup = async () => {
-    if (username && password && phone) {
+    if (username && password && phone && name) {
       try {
+        const usernameQuerySnapshot = await getDocs(query(collection(db, 'drivers'), where('username', '==', username)));
+        if (!usernameQuerySnapshot.empty) {
+          alert('Username already exists');
+          return;
+        }
+  
+        const phoneQuerySnapshot = await getDocs(query(collection(db, 'drivers'), where('phone', '==', phone)));
+        if (!phoneQuerySnapshot.empty) {
+          alert('Phone number already exists');
+          return;
+        }
+  
+        const nameQuerySnapshot = await getDocs(query(collection(db, 'drivers'), where('name', '==', name)));
+        if (!nameQuerySnapshot.empty) {
+          alert('Name already exists');
+          return;
+        }
+  
         await addDoc(collection(db, 'drivers'), {
           username: username,
           password: password,
           phone: phone,
           name: name,
         });
-        alert('Created Profile Successfully');
-
-        SETDRIVER({
-          username: username,
-          password: password,
-          phone: phone,
-          name: name,
-
-        })
-        navigation.navigate('DriverPanel')
-
+        alert('Profile created successfully');
+        navigation.navigate('DriverLogin');
       } catch (error) {
+        console.error('Error signing up:', error);
         alert('Something went wrong');
       }
+    } else {
+      alert('Please fill in all fields');
     }
   };
+  
 
   return (
     <View style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', flex: 1 }}>

@@ -2,7 +2,7 @@ import React, { useContext, useState } from 'react';
 import { Button, Image, ScrollView, Text, TextInput, View, TouchableOpacity, Pressable } from 'react-native';
 import hide from "../assets/hide.png"
 import viewButton from "../assets/view.png"
-import { addDoc, collection } from 'firebase/firestore';
+import { addDoc, collection, getDocs, query, where } from 'firebase/firestore';
 import { db } from "../firebase"
 import { useNavigation } from '@react-navigation/native';
 import { UserContext } from '../Contexts/UserContext';
@@ -18,30 +18,42 @@ const UserSignup = () => {
   const { USER, SETUSER } = useContext(UserContext);
 
   const signup = async () => {
-    if (username && password && phone) {
+    if (username && password && phone && name) {
       try {
+        const usernameQuerySnapshot = await getDocs(query(collection(db, 'users'), where('username', '==', username)));
+        if (usernameQuerySnapshot.empty) {
+          alert('Username already exists');
+          return;
+        }
+        const phoneQuerySnapshot = await getDocs(query(collection(db, 'users'), where('phone', '==', phone)));
+        if (!phoneQuerySnapshot.empty) {
+          alert('Phone number already exists');
+          return;
+        }
+        const nameQuerySnapshot = await getDocs(query(collection(db, 'users'), where('name', '==', name)));
+        if (!nameQuerySnapshot.empty) {
+          alert('Name already exists');
+          return;
+        }
+  
         await addDoc(collection(db, 'users'), {
           username: username,
           password: password,
           phone: phone,
           name: name,
         });
-        alert('Created Profile Successfully');
-
-
-        SETUSER({
-          username: username,
-          password: password,
-          phone: phone,
-          name: name,
-        })
-        navigation.navigate('UserPanel')
-
+        alert('Profile created successfully');
+        navigation.navigate('UserLogin');
       } catch (error) {
+        console.error('Error signing up:', error);
         alert('Something went wrong');
       }
+    } else {
+      alert('Please fill in all fields');
     }
   };
+  
+  
 
   return (
     <View style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', flex: 1 }}>
