@@ -21,7 +21,7 @@ const UserSignup = () => {
     if (username && password && phone && name) {
       try {
         const usernameQuerySnapshot = await getDocs(query(collection(db, 'users'), where('username', '==', username)));
-        if (usernameQuerySnapshot.empty) {
+        if (!usernameQuerySnapshot.empty) {
           alert('Username already exists');
           return;
         }
