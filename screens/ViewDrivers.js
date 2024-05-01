@@ -1,4 +1,4 @@
-import { View, Text, TouchableOpacity, Image } from 'react-native'
+import { View, Text, TouchableOpacity, Image, ScrollView } from 'react-native'
 import React, { useContext, useEffect, useState } from 'react'
 import { useNavigation } from '@react-navigation/native'
 import { collection, getDocs } from 'firebase/firestore';
@@ -60,10 +60,10 @@ const ViewDrivers = () => {
                     style={{ width: 30, height: 30, padding: 20, marginLeft: 20, marginTop: 50 }}
                 />
             </TouchableOpacity>
-            <View style={{ display: 'flex', justifyContent: 'center', marginRight: 50, marginLeft: 50 }}>
+            <ScrollView style={{ display: 'flex',   }}>
 
-                <View style={{ marginTop: 30 }}>
-                    <Text style={{ color: "black", fontSize: 24 }}>Available Drivers</Text>
+                <View style={{ marginTop: 30,  }}>
+                    <Text style={{ color: "black", fontSize: 24, textAlign: 'center', fontWeight: 'bold' }}>Available Drivers</Text>
 
                     <View style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
 
@@ -131,7 +131,7 @@ const ViewDrivers = () => {
                     </TouchableOpacity> */}
                     </View>
                 </View>
-            </View >
+            </ScrollView >
         </>
 
     )

@@ -20,6 +20,7 @@ const DriverDetailsScreen = () => {
     const requestRide = async () => {
 
         const docRef = collection(db, "drivers", VIEWDRIVERDETAILS.id, "passengers");
+        const docRef2 = doc(db, "users", USER.id);
 
         try {
             const doc = await addDoc(docRef, {
@@ -28,11 +29,12 @@ const DriverDetailsScreen = () => {
                 requestStatus: false
             });
 
+            await updateDoc(docRef2, {
+                requestStatus: false,
+            });
+
             alert('Requested Driver Successfully');
             setRequested(true)
-            // await AsyncStorage.setItem("PassengerID", doc.id);
-
-            // setPassengerID(doc.id)
 
         } catch (error) {
             console.log(error)
@@ -65,6 +67,13 @@ const DriverDetailsScreen = () => {
     //         }
     //     });
     // }
+        const unsub = onSnapshot(doc(db, "users", USER.id), (doc) => {
+            setAccepted(doc.data().requestStatus)
+            if (doc.data().requestStatus) {
+                navigation.navigate('UserTrackingScreen')
+            }
+        });
+
 
 
 

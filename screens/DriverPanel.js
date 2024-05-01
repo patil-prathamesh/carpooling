@@ -1,7 +1,7 @@
 import { useNavigation } from '@react-navigation/native';
 import React, { useContext, useEffect, useState } from 'react';
 import { Button, Text, TextInput, TouchableOpacity, View, Image } from 'react-native';
-import { collection, doc, getDoc, getDocs, increment, onSnapshot, updateDoc } from 'firebase/firestore';
+import { collection, doc, getDoc, getDocs, increment, onSnapshot, query, updateDoc, where } from 'firebase/firestore';
 import { db } from '../firebase';
 import { UserContext } from '../Contexts/UserContext';
 
@@ -75,22 +75,35 @@ const DriverPanel = () => {
     async function confirmPassenger(passenger) {
         const docRef = doc(db, "drivers", DRIVER.id, "passengers", passenger.id);
         const docRef2 = doc(db, "drivers", DRIVER.id);
-    
-        try {
-            await updateDoc(docRef, {
-                requestStatus: true,
+        let userID = null;
+
+        const userQuerySnapshot = await getDocs(query(collection(db, 'users'), where('phone', '==', passenger.phone)));
+        if (!userQuerySnapshot.empty) {
+            userQuerySnapshot.forEach((doc) => {
+                userID = doc.id;
             });
-    
-            await updateDoc(docRef2, {
-                noOfSeats: increment(-1),
-            });
-    
-            alert('Confirmed Successfully');
-        } catch (error) {
-            alert('Unable to update');
         }
+        if (userID !== null) {
+            const docRef3 = doc(db, "users", userID);
+            try {
+                await updateDoc(docRef3, {
+                    requestStatus: true,
+                });
+                await updateDoc(docRef, {
+                    requestStatus: true,
+                });
+                await updateDoc(docRef2, {
+                    noOfSeats: increment(-1),
+                });
+                alert('Confirmed Successfully');
+            } catch (error) {
+                alert('Unable to update');
+            }
+        }
+
+
     }
-    
+
 
     // const unsub = onSnapshot(doc(db, "drivers", DRIVER.id), (doc) => {
     const unsub = onSnapshot(doc(db, "drivers", DRIVER.id), (doc) => {
@@ -105,7 +118,7 @@ const DriverPanel = () => {
         }
     });
 
-    
+
 
 
     useEffect(() => {
@@ -115,7 +128,7 @@ const DriverPanel = () => {
                 const fetchedPassengers = [];
 
                 querySnapshot.forEach((doc) => {
-                    fetchedPassengers.push({ id: doc.id, name: doc.data().passenger, phone: doc.data().passengerPhone, requestStatus: doc.data().requestStatus});
+                    fetchedPassengers.push({ id: doc.id, name: doc.data().passenger, phone: doc.data().passengerPhone, requestStatus: doc.data().requestStatus });
                 });
                 console.log(fetchedPassengers)
 
@@ -201,7 +214,7 @@ const DriverPanel = () => {
                         {
                             fetched && (
                                 <View>
-q                                    <Text style={{ fontSize: 20, marginBottom: 20, fontWeight: 'normal' }}>Departure Time: {departureTime}</Text>
+                                    q                                    <Text style={{ fontSize: 20, marginBottom: 20, fontWeight: 'normal' }}>Departure Time: {departureTime}</Text>
                                     <Text style={{ fontSize: 20, marginBottom: 20, fontWeight: 'normal' }}>Passenger Name: {passenger}</Text>
                                     <Text style={{ fontSize: 20, marginBottom: 20, fontWeight: 'normal' }}>Passenger Phone: {passengerPhone}</Text>
                                     <TouchableOpacity onPress={confirmPassenger} style={{ marginTop: 20 }}>
@@ -237,87 +250,87 @@ q                                    <Text style={{ fontSize: 20, marginBottom: 
 
                             <View style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
                                 {passengersObj.map((passenger) => {
-                                    return passenger.requestStatus === true ? 
-                                    (
-                                        <TouchableOpacity key={passenger.id} style={{ marginTop: 20 }} >
-    
-                                            <View style={{ display: 'flex', flexDirection: 'row', justifyContent: 'start', alignItems: 'center', backgroundColor: '#4ade80', borderRadius: 20, width: 340, height: 90, paddingLeft: 20 }}>
-                                                {passenger.profileUrl ? (
-                                                    <Image
-                                                        source={{ uri: passenger?.profileUrl }}
-                                                        resizeMode="cover"
-                                                        style={{ width: 60, height: 60, borderRadius: 40 }}
-                                                    />
-                                                )
-                                                    :
-                                                    (<Image
-                                                        source={require('../assets/user.png')}
-                                                        resizeMode="cover"
-                                                        style={{ width: 60, height: 60, borderRadius: 40 }}
-                                                    />)
-                                                }
-                                                <View style={{}}>
-                                                    <Text style={{ color: 'white', fontSize: 20, marginLeft: 10, marginRight: 10, color: 'black' }}>{passenger.name}</Text>
-                                                    <Text>Tap to Confirm</Text>
+                                    return passenger.requestStatus === true ?
+                                        (
+                                            <TouchableOpacity key={passenger.id} style={{ marginTop: 20 }} >
+
+                                                <View style={{ display: 'flex', flexDirection: 'row', justifyContent: 'start', alignItems: 'center', backgroundColor: '#4ade80', borderRadius: 20, width: 340, height: 90, paddingLeft: 20 }}>
+                                                    {passenger.profileUrl ? (
+                                                        <Image
+                                                            source={{ uri: passenger?.profileUrl }}
+                                                            resizeMode="cover"
+                                                            style={{ width: 60, height: 60, borderRadius: 40 }}
+                                                        />
+                                                    )
+                                                        :
+                                                        (<Image
+                                                            source={require('../assets/user.png')}
+                                                            resizeMode="cover"
+                                                            style={{ width: 60, height: 60, borderRadius: 40 }}
+                                                        />)
+                                                    }
+                                                    <View style={{}}>
+                                                        <Text style={{ color: 'white', fontSize: 20, marginLeft: 10, marginRight: 10, color: 'black' }}>{passenger.name}</Text>
+                                                        <Text>Tap to Confirm</Text>
+                                                    </View>
+
+                                                    <View style={{ display: 'flex', flexDirection: 'row', justifyContent: 'center', alignItems: 'center', marginLeft: 20 }}>
+                                                        <Image
+                                                            source={require('../assets/phone.png')}
+                                                            resizeMode="contain"
+                                                            style={{ width: 20, height: 20, tintColor: 'gray', }}
+                                                        />
+
+                                                        <Text style={{ color: 'white', fontSize: 14, fontWeight: 'bold', marginRight: 10, color: 'black', padding: 10 }}>{passenger.phone}</Text>
+                                                    </View>
                                                 </View>
-    
-                                                <View style={{ display: 'flex', flexDirection: 'row', justifyContent: 'center', alignItems: 'center', marginLeft: 20 }}>
-                                                    <Image
-                                                        source={require('../assets/phone.png')}
-                                                        resizeMode="contain"
-                                                        style={{ width: 20, height: 20, tintColor: 'gray', }}
-                                                    />
-    
-                                                    <Text style={{ color: 'white', fontSize: 14, fontWeight: 'bold', marginRight: 10, color: 'black',  padding: 10 }}>{passenger.phone}</Text>
+                                            </TouchableOpacity>
+
+                                        ) : (
+                                            <TouchableOpacity key={passenger.id} style={{ marginTop: 20 }} onPress={() => confirmPassenger(passenger)}>
+
+                                                <View style={{ display: 'flex', flexDirection: 'row', justifyContent: 'start', alignItems: 'center', backgroundColor: 'white', borderRadius: 20, width: 340, height: 90, paddingLeft: 20 }}>
+                                                    {passenger.profileUrl ? (
+                                                        <Image
+                                                            source={{ uri: passenger?.profileUrl }}
+                                                            resizeMode="cover"
+                                                            style={{ width: 60, height: 60, borderRadius: 40 }}
+                                                        />
+                                                    )
+                                                        :
+                                                        (<Image
+                                                            source={require('../assets/user.png')}
+                                                            resizeMode="cover"
+                                                            style={{ width: 60, height: 60, borderRadius: 40 }}
+                                                        />)
+                                                    }
+                                                    <View style={{}}>
+                                                        <Text style={{ color: 'white', fontSize: 20, marginLeft: 10, marginRight: 10, color: 'black' }}>{passenger.name}</Text>
+                                                        <Text>Tap to Confirm</Text>
+                                                    </View>
+
+                                                    <View style={{ display: 'flex', flexDirection: 'row', justifyContent: 'center', alignItems: 'center', marginLeft: 20 }}>
+                                                        <Image
+                                                            source={require('../assets/phone.png')}
+                                                            resizeMode="contain"
+                                                            style={{ width: 20, height: 20, tintColor: 'gray', }}
+                                                        />
+
+                                                        <Text style={{ color: 'white', fontSize: 14, fontWeight: 'bold', marginRight: 10, color: 'black', backgroundColor: 'white', padding: 10 }}>{passenger.phone}</Text>
+                                                    </View>
+
+
                                                 </View>
-                                            </View>
-                                        </TouchableOpacity>
-    
-                                    ):(
-                                        <TouchableOpacity key={passenger.id} style={{ marginTop: 20 }} onPress={() => confirmPassenger(passenger)}>
-    
-                                            <View style={{ display: 'flex', flexDirection: 'row', justifyContent: 'start', alignItems: 'center', backgroundColor: 'white', borderRadius: 20, width: 340, height: 90, paddingLeft: 20 }}>
-                                                {passenger.profileUrl ? (
-                                                    <Image
-                                                        source={{ uri: passenger?.profileUrl }}
-                                                        resizeMode="cover"
-                                                        style={{ width: 60, height: 60, borderRadius: 40 }}
-                                                    />
-                                                )
-                                                    :
-                                                    (<Image
-                                                        source={require('../assets/user.png')}
-                                                        resizeMode="cover"
-                                                        style={{ width: 60, height: 60, borderRadius: 40 }}
-                                                    />)
-                                                }
-                                                <View style={{}}>
-                                                    <Text style={{ color: 'white', fontSize: 20, marginLeft: 10, marginRight: 10, color: 'black' }}>{passenger.name}</Text>
-                                                    <Text>Tap to Confirm</Text>
-                                                </View>
-    
-                                                <View style={{ display: 'flex', flexDirection: 'row', justifyContent: 'center', alignItems: 'center', marginLeft: 20 }}>
-                                                    <Image
-                                                        source={require('../assets/phone.png')}
-                                                        resizeMode="contain"
-                                                        style={{ width: 20, height: 20, tintColor: 'gray', }}
-                                                    />
-    
-                                                    <Text style={{ color: 'white', fontSize: 14, fontWeight: 'bold', marginRight: 10, color: 'black', backgroundColor: 'white', padding: 10 }}>{passenger.phone}</Text>
-                                                </View>
-    
-    
-                                            </View>
-    
-    
-                                        </TouchableOpacity>
-    
-                                    )
+
+
+                                            </TouchableOpacity>
+
+                                        )
                                 })}
 
                             </View>
 
-                            <TouchableOpacity onPress={()=> navigation.navigate('DriverTrackingScreen')} style={{ marginTop: 20 }}>
+                            <TouchableOpacity onPress={() => navigation.navigate('DriverTrackingScreen')} style={{ marginTop: 20 }}>
                                 <View style={{
                                     backgroundColor: 'black',
                                     paddingHorizontal: 20,
